@@ -1,0 +1,6 @@
+<resources>
+    <string name="description">只读观察原厂相机 HDR 决策，默认关闭。不修改拍摄参数或照片，不生成 SDR 增益图，不依赖 OPCameraPro。</string>
+    <string-array name="scope">
+        <item>com.oplus.camera</item>
+    </string-array>
+</resources>

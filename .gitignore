@@ -1,0 +1,9 @@
+.gradle/
+local.properties
+**/build/
+.idea/
+__pycache__/
+/private/
+*.zip
+*.apk
+*.so
