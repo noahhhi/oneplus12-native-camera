@@ -21,6 +21,7 @@ public final class HdrProbe implements IXposedHookLoadPackage {
             }
             ClassLoader cl = load.classLoader;
             NativeConfigProbe.install(cl);
+            NativeVideoProbe.install(cl);
             XposedBridge.log("OnePlusHdr: camera APK verified; native diagnostics initialized");
         } catch (Throwable error) {
             XposedBridge.log("OnePlusHdr: setup skipped: " + error);

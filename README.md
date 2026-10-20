@@ -1,17 +1,23 @@
 # OnePlus 12 Native Camera
 
-Independent research and version-pinned native camera fixes for OnePlus 12.
+Independent research and version-pinned native camera fixes for OnePlus 12, stock Camera 6.070.215.
 
-See [HDR implementation and validation](hdrprobe/README.md). The repository contains only original research tools and a read-only diagnostic module. Device firmware, private photos and generated device-specific packages are not distributed.
+See [HDR implementation and validation](hdrprobe/README.md) and [research notes](docs/ultrahdr-research.md). Public files contain original build tools and opt-in, read-only diagnostics. Firmware, private photos, device logs and generated device-specific packages are not distributed.
 
-Current validated scope: main camera 1x automatic JPEG native HDR in Master mode. Ultra-wide, telephoto and 6x support are under development. Dolby Vision 4K60 recording research follows the photo work.
+## Photo status
 
-The diagnostic project was extracted from our work on the public OPCameraPro mirror. This is a standalone repository, not a GitHub fork; the legacy OPCameraPro application is not included. Gradle wrapper files retain their upstream notices; repository license: GPL-3.0.
+The 0.2 native HDR helper is enabled and accepted on the test device. Master mode automatic JPEG has been verified at 0.6x ultra-wide, 1x main, 3x telephoto and 6x telephoto: OEM HDR processing, valid Android gainmap decoding and usable images. Physical telephoto selection and 6x crop metadata were checked. The accepted 3x/6x captures ran without Frida.
 
-## Multi-lens candidate status
+The stock telephoto IZOOM brightness hysteresis is preserved. The 6x bright-scene branch has not yet been physically validated. Manual exposure, RAW, arbitrary zoom positions and other firmware versions are not covered by this acceptance.
 
-The 0.2 helper is a candidate, not the currently accepted device release. Native TurboHDR and Android gainmap decoding passed on the ultra-wide, 3x telephoto and 6x telephoto paths. Physical telephoto selection and 6x crop metadata were checked. Telephoto scene-quality acceptance remains pending usable camera input; a valid gainmap alone is not the final acceptance criterion.
+## Video research status
 
-The candidate also preserves the stock telephoto IZOOM brightness hysteresis for 6x; its bright-scene path has not yet been physically validated. Dolby Vision 4K60 work follows completion of photo acceptance.
+Temporary tests verified real 4K60 Dolby Vision profile 8.4 on the telephoto camera, including physical camera 4 at 13.3 mm and per-frame Dolby RPU metadata. This is a research result, not a deployed video release.
 
-Removal now closes the camera before unmounting and preserves only failed/foreign mount records for safe retries. Mock tests cover camera-stop failure, partial unmount failure/retry, foreign mount IDs and already-absent mounts.
+Ultra-wide 4K60 also produces Dolby metadata, but has an unresolved repeated-edge defect: approximately 192 rows in the unrotated frame. A lit SDR ultra-wide control has clean edges. Valid Dolby metadata does not make the defective output acceptable. No permanent video unlock is deployed.
+
+## Packaging and provenance
+
+The diagnostic project was extracted from work on the public OPCameraPro mirror. This is a standalone repository, not a GitHub fork; the legacy application and SDR-to-gainmap generation code are not included. Gradle wrapper files retain their upstream notices; repository license: GPL-3.0.
+
+The private helper uses version-checked systemless mounts. Removal closes the camera before unmounting and preserves failed or foreign mount records for safe retries. Mock tests cover camera-stop failure, partial unmount failure/retry, foreign mount IDs and already-absent mounts.
