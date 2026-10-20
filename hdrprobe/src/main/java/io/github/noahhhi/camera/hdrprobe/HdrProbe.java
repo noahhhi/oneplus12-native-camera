@@ -4,6 +4,7 @@ import java.io.FileInputStream;
 import java.security.MessageDigest;
 import de.robv.android.xposed.IXposedHookLoadPackage;
 import de.robv.android.xposed.XposedBridge;
+import de.robv.android.xposed.XposedHelpers;
 import de.robv.android.xposed.callbacks.XC_LoadPackage;
 
 /** Version-pinned entry point for native HDR diagnostics; no post-save image processing. */
@@ -15,6 +16,13 @@ public final class HdrProbe implements IXposedHookLoadPackage {
         if (!"com.oplus.camera".equals(load.packageName)
                 || !"com.oplus.camera".equals(load.processName) || !load.isFirstApplication) return;
         try {
+            Class<?> properties = XposedHelpers.findClass("android.os.SystemProperties", null);
+            boolean photoDiagnostics = "1".equals(XposedHelpers.callStaticMethod(
+                    properties, "get", "debug.noah.hdr.nativeconfig", "0"));
+            boolean videoDiagnostics = "1".equals(XposedHelpers.callStaticMethod(
+                    properties, "get", "debug.noah.hdr.video", "0"));
+            // Native helpers work independently; inactive diagnostics need no APK I/O.
+            if (!photoDiagnostics && !videoDiagnostics) return;
             if (!APK_SHA256.equals(hash(load.appInfo.sourceDir))) {
                 XposedBridge.log("OnePlusHdr: unsupported camera APK; no hooks installed");
                 return;
