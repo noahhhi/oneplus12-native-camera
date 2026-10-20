@@ -40,6 +40,8 @@ final class NativeConfigProbe {
                                 + ", feature=" + XposedHelpers.getIntField(result,"mApsDecisionFeatureType")
                                 + ", bracket=" + XposedHelpers.getIntField(result,"mApsBracketMode")
                                 + ", pipeline=" + XposedHelpers.getIntField(result,"mMasterPipeline")
+                                + ", physicalId=" + XposedHelpers.getIntField(result,"mPhysicalCameraId")
+                                + ", sensorMask=" + java.util.Arrays.toString((int[])XposedHelpers.getObjectField(result,"mSensorMask"))
                                 + ", sensors=" + java.util.Arrays.toString((int[])XposedHelpers.getObjectField(result,"mRequestSensorModeList"))
                                 + ", intent=" + XposedHelpers.getIntField(result,"mCaptureIntent");
                             synchronized (decisions) {

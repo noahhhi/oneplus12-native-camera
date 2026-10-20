@@ -25,7 +25,7 @@ CONFIGS = {
         "7529c0b4abf0af06c4b28528e19252c2e2d7d5c2985cae639870775ff773b1f9"),
     "oplus_camera_preview_decision_config.json": (
         "2f3403eed909ae4733704c48edfda03aba7cc100cc57ad972bd9eb34b4f197e7",
-        "3591f61b53dbf59b1ed72da739b637c593dddd4b519ed36f688a5eb1c09a90e5"),
+        "571dbdf3c032087b7d2d36e56b57af0d814aad2618e55e284906c66375f1412e"),
 }
 PATCHES = ((0x1FB02B8, "2a0280d2", "2a1280d2"),
            (0x1FB04FC, "6a0680d2", "6a1680d2"))
@@ -76,27 +76,57 @@ mount_id() { awk -v p="$1" '$5 == p {id=$1} END {print id}' /proc/self/mountinfo
 log() { echo "Native HDR: $*"; }
 rollback() {
   [ -f "$STATE" ] || return 0
+  remaining="$STATE.remaining.$$"
+  # Build replacement state before removing any mount. Keep the original state
+  # if recording a failure or committing the replacement itself fails.
+  (umask 077; : > "$remaining") || return 1
   failed=0
   while read -r boot mid target; do
     [ "$boot" = "$BOOT" ] || continue
-    current=$(mount_id "$target")
-    if [ "$current" != "$mid" ]; then
-      log "Refusing to unmount changed/foreign mount: $target"
+    if ! current=$(mount_id "$target"); then
+      log "Cannot inspect mount ownership: $target"
+      printf '%s %s %s\n' "$boot" "$mid" "$target" >> "$remaining" || {
+        rm -f "$remaining"; return 1;
+      }
       failed=1
       continue
     fi
-    umount "$target" || failed=1
+    # A prior attempt may already have removed this bind. No file-level mount
+    # remains, so this record can be discarded without touching anything.
+    [ -n "$current" ] || continue
+    if [ "$current" != "$mid" ]; then
+      log "Refusing to unmount changed/foreign mount: $target"
+      printf '%s %s %s\n' "$boot" "$mid" "$target" >> "$remaining" || {
+        rm -f "$remaining"; return 1;
+      }
+      failed=1
+      continue
+    fi
+    if ! umount "$target"; then
+      log "Unmount failed; retaining record for retry: $target"
+      printf '%s %s %s\n' "$boot" "$mid" "$target" >> "$remaining" || {
+        rm -f "$remaining"; return 1;
+      }
+      failed=1
+    fi
   done < "$STATE"
-  [ "$failed" = 0 ] && rm -f "$STATE"
+  if [ -s "$remaining" ]; then
+    mv -f "$remaining" "$STATE" || { rm -f "$remaining"; return 1; }
+  else
+    rm -f "$STATE" "$remaining" || return 1
+  fi
   return "$failed"
 }
 fail() { log "$*"; rollback; exit 1; }
 case "$MODE" in
   remove)
+    # Release mapped camera libraries before unmounting their backing files.
+    am force-stop com.oplus.camera || {
+      log "Cannot stop camera; mount state retained for retry."
+      exit 1
+    }
     rollback
-    result=$?
-    am force-stop com.oplus.camera
-    exit "$result"
+    exit $?
     ;;
   apply) ;;
   *) log "Expected apply or remove"; exit 1 ;;
@@ -188,8 +218,8 @@ def build(stock, output):
     files.update({
         "module.prop": (
             f"id={MODULE_ID}\nname=OnePlus 12 Native Master HDR (private)\n"
-            "version=0.1\nversionCode=1\nauthor=noahhhi\n"
-            "description=Camera 6.070.215 / Android 16 only. Experimental native HDR for main 1x automatic JPG. Action disables and removes binds. PRIVATE payload; do not distribute.\n"),
+            "version=0.2\nversionCode=2\nauthor=noahhhi\n"
+            "description=Camera 6.070.215 / Android 16 only. Experimental native HDR for ultra-wide 0.6x, main 1x, tele 3x/6x automatic JPG. Action disables and removes binds. PRIVATE payload; do not distribute.\n"),
         "skip_mount": "",
         "runtime.sh": RUNTIME.replace("@APK_HASH@", APK_HASH),
         "service.sh": wrapper("apply"),
