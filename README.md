@@ -4,6 +4,8 @@ Independent research and version-pinned native camera fixes for OnePlus 12, stoc
 
 See [HDR implementation and validation](hdrprobe/README.md) and [research notes](docs/ultrahdr-research.md). Public files contain original build tools and opt-in, read-only diagnostics. Firmware, private photos, device logs and generated device-specific packages are not distributed.
 
+Planned follow-up work: [4K Live HDR Photo, Master Live Photo and Xpan Ultra HDR](docs/roadmap.md).
+
 ## Photo status
 
 The 0.2 native HDR helper is enabled and accepted on the test device. Master mode automatic JPEG has been verified at 0.6x ultra-wide, 1x main, 3x telephoto and 6x telephoto: OEM HDR processing, valid Android gainmap decoding and usable images. Physical telephoto selection and 6x crop metadata were checked. The accepted 3x/6x captures ran without Frida.
