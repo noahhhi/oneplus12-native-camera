@@ -1,5 +1,7 @@
 # Experimental native video patch builder
 
+**Stability regression, 2026-10-21:** recording crashes were reported after installation of video addon 0.1. Short static validation did not cover this failure. The cause is unconfirmed, and the addon must not be described as stable. The next device session should preserve crash logs/tombstones first, identify whether the app, provider or codec failed, then compare stationary recording, movement and lens switching with controlled SDR/30fps cases. The independent photo helper is outside this video rollback scope.
+
 This original-source tool builds a version-pinned OnePlus 12 native video test artifact from files you extract locally. It targets a source-grid origin mismatch observed in ultrawide Dolby Vision 4K60 recordings. The repository supplies no original camera binaries, calibration dumps, or ready-to-install payload.
 
 The guarded native v3 file-backed patch passed main 4K60, physical telephoto 4K60, ultra-wide 4K60/4K30 Dolby regressions and an SDR control, without Frida. Dolby clips retained genuine profile 8.4/RPU and clean edges; the SDR control remained 8bit BT.709 with no RPU. Real handheld motion has not been validated.

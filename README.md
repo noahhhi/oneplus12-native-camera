@@ -6,6 +6,8 @@ See [HDR implementation and validation](hdrprobe/README.md) and [research notes]
 
 Planned follow-up work: [4K Live HDR Photo, Master Live Photo and Xpan Ultra HDR](docs/roadmap.md).
 
+Offline reference work: [verified PMX110 firmware and initial camera/SDK comparison](docs/findx10-reference.md).
+
 ## Photo status
 
 The 0.2 native HDR helper is enabled and accepted on the test device. Master mode automatic JPEG has been verified at 0.6x ultra-wide, 1x main, 3x telephoto and 6x telephoto: OEM HDR processing, valid Android gainmap decoding and usable images. Physical telephoto selection and 6x crop metadata were checked. The accepted 3x/6x captures ran without Frida.
@@ -13,6 +15,8 @@ The 0.2 native HDR helper is enabled and accepted on the test device. Master mod
 The stock telephoto IZOOM brightness hysteresis is preserved. The 6x bright-scene branch has not yet been physically validated. Manual exposure, RAW, arbitrary zoom positions and other firmware versions are not covered by this acceptance.
 
 ## Video research status
+
+**Open regression: recording crashes were reported during manual use on 2026-10-21. Version 0.1 is not accepted as stable.** The earlier short-clip results below remain limited observations. Crash logs and provider tombstones are needed to identify the failing process and path before attempting a fix; no cause or resolution is confirmed.
 
 The separate 0.1 experimental video addon is now installed on the test device alongside the accepted 0.2 photo helper. Activation, module Action rollback and reactivation passed on-device: rollback restored the original video node/configuration hashes without changing the photo helper.
 
