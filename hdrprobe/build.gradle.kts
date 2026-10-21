@@ -9,8 +9,8 @@ android {
         applicationId = "io.github.noahhhi.camera.hdrprobe"
         minSdk = 35
         targetSdk = 36
-        versionCode = 13
-        versionName = "1.3-idle-gated"
+        versionCode = 17
+        versionName = "1.7-xpan-native"
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11

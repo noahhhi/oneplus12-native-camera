@@ -2,7 +2,7 @@
 
 Independent research and version-pinned native camera fixes for OnePlus 12, stock Camera 6.070.215.
 
-See [HDR implementation and validation](hdrprobe/README.md) and [research notes](docs/ultrahdr-research.md). Public files contain original build tools and opt-in, read-only diagnostics. Firmware, private photos, device logs and generated device-specific packages are not distributed.
+See [HDR implementation and validation](hdrprobe/README.md) and [research notes](docs/ultrahdr-research.md). Public files contain original build tools, a gated SDK control and read-only observers. Firmware, private photos, device logs and generated device-specific packages are not distributed.
 
 Planned follow-up work: [4K Live HDR Photo, Master Live Photo and Xpan Ultra HDR](docs/roadmap.md).
 
@@ -10,7 +10,11 @@ Offline reference work: [verified PMX110 firmware and initial camera/SDK compari
 
 ## Photo status
 
-The 0.2 native HDR helper is enabled and accepted on the test device. Master mode automatic JPEG has been verified at 0.6x ultra-wide, 1x main, 3x telephoto and 6x telephoto: OEM HDR processing, valid Android gainmap decoding and usable images. Physical telephoto selection and 6x crop metadata were checked. The accepted 3x/6x captures ran without Frida.
+Photo helper 0.3 is now installed. It preserves the 0.2 Master-mode configuration, previously verified for automatic JPEG at 0.6x, 1x, 3x and 6x, and adds verified XPan HDR for the main camera at 1x with automatic ISO/shutter and JPEG output. XPan remains native mode 29: five RAW frames → TurboHDR(65) → MaskRefine(72) → gainmap → JPEG. Its 7872×2912 output (or rotated equivalent) has a half-resolution gainmap. Post-install capture without Frida verified 2912×7872 with a 1456×3936 gainmap.
+
+XPan requires companion APK version code 17 or newer, enabled in LSPosed for the stock camera. Its gated control overrides only the SDK's `com.oplus.xpan.multi.frame` Boolean; it is no longer an entirely read-only module. Run the photo helper's Action before disabling its LSPosed scope. The five photo mounts exclude `oplus_camera_config`, leaving the separate video configuration alone.
+
+The current Master regression used manual ISO 320 and correctly remained SDR; it is not a new automatic-Master HDR test. The final post-install normal-mode regression was interrupted before the shutter and is not counted as passed. Other XPan lenses, black-and-white rendering and watermarks have not been validated.
 
 The stock telephoto IZOOM brightness hysteresis is preserved. The 6x bright-scene branch has not yet been physically validated. Manual exposure, RAW, arbitrary zoom positions and other firmware versions are not covered by this acceptance.
 
@@ -18,7 +22,7 @@ The stock telephoto IZOOM brightness hysteresis is preserved. The 6x bright-scen
 
 **Open regression: recording crashes were reported during manual use on 2026-10-21. Version 0.1 is not accepted as stable.** The earlier short-clip results below remain limited observations. Crash logs and provider tombstones are needed to identify the failing process and path before attempting a fix; no cause or resolution is confirmed.
 
-The separate 0.1 experimental video addon is now installed on the test device alongside the accepted 0.2 photo helper. Activation, module Action rollback and reactivation passed on-device: rollback restored the original video node/configuration hashes without changing the photo helper.
+The separate 0.1 experimental video addon is unchanged by photo helper 0.3. Its instability remains a separate task. Earlier activation, Action rollback and reactivation passed on-device: rollback restored the original video node/configuration hashes without changing the photo helper.
 
 The ultra-wide 4K60 repeated-edge defect has been isolated to a coordinate-origin issue. A temporary native correction removed the approximately 192-row extension and aligned framing with the SDR control in one fixed scene. All 347 frames had valid Dolby RPU metadata; the clip retained 10bit Dolby Vision 8.4 at approximately 59.10 fps, with zero L5 crop offsets.
 

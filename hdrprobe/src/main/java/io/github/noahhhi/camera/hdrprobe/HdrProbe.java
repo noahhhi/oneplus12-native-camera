@@ -7,7 +7,7 @@ import de.robv.android.xposed.XposedBridge;
 import de.robv.android.xposed.XposedHelpers;
 import de.robv.android.xposed.callbacks.XC_LoadPackage;
 
-/** Version-pinned entry point for native HDR diagnostics; no post-save image processing. */
+/** Version-pinned native HDR controls and diagnostics; no post-save image processing. */
 public final class HdrProbe implements IXposedHookLoadPackage {
     private static final String APK_SHA256 =
         "7833a1c3ca932503b77015d5d31493f99b0586580f68eb9ed14b93a2573fdd16";
@@ -21,16 +21,22 @@ public final class HdrProbe implements IXposedHookLoadPackage {
                     properties, "get", "debug.noah.hdr.nativeconfig", "0"));
             boolean videoDiagnostics = "1".equals(XposedHelpers.callStaticMethod(
                     properties, "get", "debug.noah.hdr.video", "0"));
-            // Native helpers work independently; inactive diagnostics need no APK I/O.
-            if (!photoDiagnostics && !videoDiagnostics) return;
+            boolean xpanDiagnostics = "1".equals(XposedHelpers.callStaticMethod(
+                    properties, "get", "debug.noah.hdr.xpan", "0"));
+            boolean xpanNative = "1".equals(XposedHelpers.callStaticMethod(
+                    properties, "get", "debug.noah.hdr.xpan_native", "0"));
+            // Inactive controls and diagnostics need no APK I/O.
+            if (!photoDiagnostics && !videoDiagnostics && !xpanDiagnostics && !xpanNative) return;
             if (!APK_SHA256.equals(hash(load.appInfo.sourceDir))) {
                 XposedBridge.log("OnePlusHdr: unsupported camera APK; no hooks installed");
                 return;
             }
             ClassLoader cl = load.classLoader;
+            NativeXpanConfig.install(cl);
             NativeConfigProbe.install(cl);
             NativeVideoProbe.install(cl);
-            XposedBridge.log("OnePlusHdr: camera APK verified; native diagnostics initialized");
+            XpanObserver.install(cl);
+            XposedBridge.log("OnePlusHdr: camera APK verified; native controls and diagnostics initialized");
         } catch (Throwable error) {
             XposedBridge.log("OnePlusHdr: setup skipped: " + error);
         }
